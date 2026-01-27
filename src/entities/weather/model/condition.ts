@@ -66,27 +66,3 @@ export function conditionToText(
       return "빗방울눈날림";
   }
 }
-
-export function conditionToIcon(cond: WeatherCondition | null): string | null {
-  if (!cond) return null;
-  switch (cond) {
-    case "SUNNY":
-      return "sun";
-    case "CLOUDY":
-      return "cloud";
-    case "OVERCAST":
-      return "cloudy";
-    case "RAIN":
-      return "rain";
-    case "SNOW":
-      return "snow";
-    case "SLEET":
-      return "sleet";
-    case "SHOWER":
-      return "shower";
-    case "DRIZZLE":
-      return "drizzle";
-    case "SNOW_FLURRY":
-      return "snow-wind";
-  }
-}

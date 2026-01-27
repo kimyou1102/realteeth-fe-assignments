@@ -1,4 +1,4 @@
-import type { SkyCode, PtyCode } from "./type";
+import type { SkyCode, PtyCode, WeatherIconKey } from "./type";
 
 export type WeatherCondition =
   | "SUNNY"
@@ -41,7 +41,9 @@ export function getCondition(args: {
   return "OVERCAST";
 }
 
-export function conditionToText(cond: WeatherCondition | null): string | null {
+export function conditionToText(
+  cond: WeatherCondition | null,
+): WeatherIconKey | null {
   if (!cond) return null;
   switch (cond) {
     case "SUNNY":
@@ -61,7 +63,7 @@ export function conditionToText(cond: WeatherCondition | null): string | null {
     case "DRIZZLE":
       return "빗방울";
     case "SNOW_FLURRY":
-      return "눈날림";
+      return "빗방울눈날림";
   }
 }
 

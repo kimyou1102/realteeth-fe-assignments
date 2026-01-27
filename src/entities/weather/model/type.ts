@@ -32,3 +32,14 @@ export type WeatherSummary = {
     ptyCode: PtyCode | null;
   }>;
 };
+
+export type WeatherIconKey =
+  | "맑음"
+  | "구름많음"
+  | "흐림"
+  | "비"
+  | "소나기"
+  | "눈"
+  | "비/눈"
+  | "빗방울"
+  | "빗방울눈날림";

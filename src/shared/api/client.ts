@@ -2,7 +2,7 @@ import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "",
+  baseURL: import.meta.env.VITE_KMA_BASE_URL,
 });
 
 async function get<T>(config: AxiosRequestConfig): Promise<T> {

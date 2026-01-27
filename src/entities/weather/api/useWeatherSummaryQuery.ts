@@ -16,12 +16,15 @@ export function useWeatherSummaryQuery({
   lat,
   lon,
 }: {
-  lat: number;
-  lon: number;
+  lat: number | undefined;
+  lon: number | undefined;
 }) {
+  const canFetch = lat != undefined && lon != undefined;
+
   return useQuery<WeatherSummary, Error, WeatherSummaryWithConditionText>({
     queryKey: ["weatherSummary", lat, lon],
-    queryFn: () => getWeatherSummaryByLatLon({ lat, lon }),
+    enabled: canFetch,
+    queryFn: () => getWeatherSummaryByLatLon({ lat: lat!, lon: lon! }),
     staleTime: 1000 * 60 * 3,
     select: (data) => {
       const currentCondition = getCondition({

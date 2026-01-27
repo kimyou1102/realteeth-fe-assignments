@@ -8,8 +8,8 @@ export function HomePage() {
   const { coords, isLoading, error } = useGeolocation();
 
   const { data } = useWeatherSummaryQuery({
-    lat: coords?.lat ?? 0,
-    lon: coords?.lng ?? 0,
+    lat: coords?.lat,
+    lon: coords?.lng,
   });
 
   if (!coords || isLoading) return <div>위치 확인 중...</div>;

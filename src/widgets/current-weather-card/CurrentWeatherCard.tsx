@@ -1,10 +1,12 @@
-import { Droplets, Wind, Star, Sun } from "lucide-react";
+import { Droplets, Wind, Star } from "lucide-react";
 import { cn } from "../../shared/lib/cn";
+import { WeatherIcon } from "../../shared/ui/weather-icon/WeatherIcon";
+import type { WeatherIconKey } from "../../entities/weather/model/type";
 
 interface CurrentWeatherCardProps {
   locationName: string;
   temperature: number;
-  conditionLabel: string;
+  conditionLabel: WeatherIconKey | null;
   tempMax: number;
   tempMin: number;
   humidity: number;
@@ -35,8 +37,7 @@ function CurrentWeatherCard({
       <h2 className="text-2xl font-semibold text-gray-900">{locationName}</h2>
 
       <div className="mt-6 flex items-center justify-center gap-6">
-        {/* TODO: 날씨별 아이콘 변경 필요 */}
-        <Sun className="h-14 w-14 text-blue-600" aria-hidden="true" />
+        <WeatherIcon name={conditionLabel} size={56} />
         <div className="flex items-start">
           <span className="text-6xl font-light leading-none text-gray-900">
             {temperature}
@@ -45,7 +46,9 @@ function CurrentWeatherCard({
         </div>
       </div>
 
-      <p className="mt-4 text-sm text-gray-600">{conditionLabel}</p>
+      <p className="mt-4 text-sm text-gray-600">
+        {conditionLabel ?? "정보 없음"}{" "}
+      </p>
 
       <div className="mt-5 flex items-center justify-center gap-4 text-sm text-gray-600">
         <span>최고 {tempMax}°</span>

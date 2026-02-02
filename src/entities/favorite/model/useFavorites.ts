@@ -75,6 +75,26 @@ export function useFavorites() {
     });
   }, []);
 
+  const reName = useCallback((id: string, nextName: string) => {
+    const trimmed = nextName.trim();
+    if (!id) return;
+    if (!trimmed) return; // 빈 이름 허용하고 싶으면 이 줄 제거
+
+    setFavorites((prev) => {
+      const target = prev[id];
+      if (!target) return prev;
+      if (target.name === trimmed) return prev;
+
+      const next: FavoriteMap = {
+        ...prev,
+        [id]: { ...target, name: trimmed },
+      };
+
+      saveFavorites(next);
+      return next;
+    });
+  }, []);
+
   const isFavorite = useCallback(
     (location: LocationLike, adminRegion: string | null) => {
       if (!location) return false;
@@ -84,5 +104,5 @@ export function useFavorites() {
     [favorites],
   );
 
-  return { favorites, toggle, remove, isFavorite };
+  return { favorites, toggle, remove, reName, isFavorite };
 }

@@ -5,10 +5,10 @@ import type { WeatherIconKey } from "../../../entities/weather/model/type";
 
 interface FavoriteWeatherItemProps {
   name: string;
-  current: number;
-  min: number;
-  max: number;
-  conditionText: WeatherIconKey;
+  current: number | null;
+  min: number | null;
+  max: number | null;
+  conditionText: WeatherIconKey | null;
 
   onChangeName: (nextName: string) => void;
   onDelete: () => void;
@@ -93,7 +93,7 @@ export function FavoriteWeatherItem({
 
       <div className="mt-6 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <WeatherIcon name={conditionText} />
+          {conditionText && <WeatherIcon name={conditionText} />}
 
           <div>
             <div className="flex items-start">
@@ -109,11 +109,11 @@ export function FavoriteWeatherItem({
         <div className="text-right text-sm text-gray-600">
           <div className="flex items-center justify-end gap-2">
             <span className="text-gray-500">최고</span>
-            <span className="font-medium text-gray-900">{max}°</span>
+            <span className="font-medium text-gray-900">{max ?? "-"}°</span>
           </div>
           <div className="mt-2 flex items-center justify-end gap-2">
             <span className="text-gray-500">최저</span>
-            <span className="font-medium text-gray-900">{min}°</span>
+            <span className="font-medium text-gray-900">{min ?? "-"}°</span>
           </div>
         </div>
       </div>

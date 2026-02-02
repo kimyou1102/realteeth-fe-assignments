@@ -18,6 +18,7 @@ import {
   type AddressItem,
 } from "../../shared/lib/addressSearch/searchAddresses";
 import { useActiveLocation } from "../../entities/location/model/useActiveLocation";
+import { useFavoriteContext } from "../../entities/favorite/model/useFavoriteContext";
 
 export function HomePage() {
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -26,6 +27,7 @@ export function HomePage() {
   const { coords, isLoading, error } = useGeolocation();
   const { activeLocation, setFromGeo, setFromSearch } = useActiveLocation();
   const debouncedQuery = useDebouncedValue(searchKeyword, 150);
+  const { toggle, isFavorite } = useFavoriteContext();
 
   const { data: weatherSummary, isError: isWeatherSummaryError } =
     useWeatherSummaryQuery({
@@ -82,6 +84,12 @@ export function HomePage() {
     }
   };
 
+  const handleFavoriteClick = () => {
+    toggle(activeLocation, adminRegion!);
+  };
+
+  const isFavoriteValue = isFavorite(activeLocation, adminRegion!);
+
   const suggestions = useMemo(
     () => searchAddresses(koreaDistricts, debouncedQuery, MAX_SUGGESTIONS),
     [debouncedQuery],
@@ -121,8 +129,8 @@ export function HomePage() {
                 humidity={weatherSummary?.current.humidityPct ?? 0}
                 windSpeed={weatherSummary?.current.windSpeedMs ?? 0}
                 // TODO: 즐겨찾기 기능 추가 예정
-                isFavorite
-                onFavoriteToggle={() => {}}
+                isFavorite={isFavoriteValue}
+                onFavoriteToggle={handleFavoriteClick}
               />
               <HourlyForecast forecasts={weatherSummary?.hourly3h ?? []} />
             </>

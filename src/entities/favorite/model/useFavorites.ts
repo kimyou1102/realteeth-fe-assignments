@@ -61,6 +61,20 @@ export function useFavorites() {
     [],
   );
 
+  const remove = useCallback((name: string) => {
+    if (!name) return;
+
+    setFavorites((prev) => {
+      if (!prev[name]) return prev;
+
+      const next = { ...prev };
+      delete next[name];
+
+      saveFavorites(next);
+      return next;
+    });
+  }, []);
+
   const isFavorite = useCallback(
     (location: LocationLike, adminRegion: string | null) => {
       if (!location) return false;
@@ -70,5 +84,5 @@ export function useFavorites() {
     [favorites],
   );
 
-  return { favorites, toggle, isFavorite };
+  return { favorites, toggle, remove, isFavorite };
 }

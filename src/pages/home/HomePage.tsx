@@ -4,49 +4,79 @@ import { useWeatherSummaryQuery } from "../../entities/weather/api/useWeatherSum
 import { useGeolocation } from "../../shared/lib/geolocation/useGeolocation";
 import { LocationPermissionDenied } from "../../shared/ui/location-permission-denied/LocationPermissionDenied";
 import { useQuery } from "@tanstack/react-query";
-import { reverseGeocodeKoreanAdmin } from "../../shared/lib/kakao/reverseGeocodeKoreanAdmin";
 import { HourlyForecast } from "../../widgets/hourly-forecast/HourlyForecast";
 import { SearchInput } from "../../shared/ui/search-input/SearchInput";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AddressAutoCompleteList } from "../../shared/ui/address-auto-complete-list/AddressAutocompleteList";
 import koreaDistricts from "../../shared/data/korea_districts.json";
+import { reverseGeocodeKoreanAdmin } from "../../shared/lib/kakao/reverseGeocodeKoreanAdmin";
+import { geocodeByKakao } from "../../shared/lib/kakao/geocodeByKakao";
 import { useDebouncedValue } from "../../shared/lib/addressSearch/useDebouncedValue";
 import {
   MAX_SUGGESTIONS,
   searchAddresses,
   type AddressItem,
 } from "../../shared/lib/addressSearch/searchAddresses";
+import { useActiveLocation } from "../../entities/location/model/useActiveLocation";
 
 export function HomePage() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
   const { coords, isLoading, error } = useGeolocation();
+  const { activeLocation, setFromGeo, setFromSearch } = useActiveLocation();
   const debouncedQuery = useDebouncedValue(searchKeyword, 150);
 
   const { data } = useWeatherSummaryQuery({
-    lat: coords?.lat,
-    lon: coords?.lng,
+    lat: activeLocation?.lat,
+    lon: activeLocation?.lon,
   });
 
   const { data: adminRegion } = useQuery({
-    queryKey: ["adminRegion", coords?.lat, coords?.lng],
-    enabled: coords?.lat != undefined && coords?.lng != undefined,
+    queryKey: ["adminRegion", activeLocation?.lat, activeLocation?.lon],
+    enabled:
+      activeLocation?.lat != undefined &&
+      activeLocation?.lon != undefined &&
+      !activeLocation?.label,
     queryFn: () =>
       reverseGeocodeKoreanAdmin({
-        lat: coords!.lat!,
-        lng: coords!.lng!,
+        lat: activeLocation!.lat,
+        lng: activeLocation!.lon,
       }),
     staleTime: 1000 * 60 * 60,
   });
+
+  useEffect(() => {
+    if (!activeLocation && coords) {
+      setFromGeo(coords.lat, coords.lng);
+    }
+  }, [activeLocation, coords, setFromGeo]);
 
   const handleSearchChange = (value: string) => {
     setSearchKeyword(value);
     setIsSuggestionOpen(true);
   };
 
-  const handleAddressClick = (suggestion: AddressItem) => {
+  const handleAddressClick = async (suggestion: AddressItem) => {
     setSearchKeyword(suggestion.label);
     setIsSuggestionOpen(false);
+    setSearchKeyword("");
+
+    try {
+      const lat = suggestion.lat;
+      const lon = suggestion.lon;
+      const coordsFromLabel =
+        lat != undefined && lon != undefined
+          ? { lat, lon }
+          : await geocodeByKakao(suggestion.label);
+
+      setFromSearch({
+        lat: coordsFromLabel.lat,
+        lon: coordsFromLabel.lon,
+        label: suggestion.label,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const suggestions = useMemo(
@@ -54,12 +84,12 @@ export function HomePage() {
     [debouncedQuery],
   );
 
-  if (!coords || isLoading) return <div>위치 확인 중...</div>;
+  if (!activeLocation && isLoading) return <div>위치 확인 중...</div>;
 
   return (
     <main>
       <HomeHeader />
-      {error ? (
+      {error && !activeLocation ? (
         <LocationPermissionDenied />
       ) : (
         <>
@@ -77,7 +107,7 @@ export function HomePage() {
           </div>
 
           <CurrentWeatherCard
-            locationName={adminRegion ?? ""}
+            locationName={activeLocation?.label ?? adminRegion ?? ""}
             temperature={data?.current.tempC ?? 0}
             conditionLabel={data?.current.conditionText ?? null}
             tempMax={data?.today.maxTempC ?? 0}

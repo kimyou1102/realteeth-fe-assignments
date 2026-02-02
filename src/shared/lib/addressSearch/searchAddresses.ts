@@ -3,6 +3,8 @@ import { normalize } from "./normalize";
 export type AddressItem = {
   raw: string;
   label: string;
+  lat?: number;
+  lon?: number;
 };
 
 export const MAX_SUGGESTIONS = 8;

@@ -3,6 +3,8 @@ import { cn } from "../../lib/cn";
 interface AddressSuggestion {
   raw: string;
   label: string;
+  lat?: number;
+  lon?: number;
 }
 
 interface AddressAutocompleteListProps {

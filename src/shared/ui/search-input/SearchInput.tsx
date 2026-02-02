@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+import { Search } from "lucide-react";
 import { cn } from "../../lib/cn";
 
 interface SearchInputProps {

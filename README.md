@@ -4,7 +4,7 @@
 
 ## 배포 사이트
 
-https://realteeth-fe-assignments-kzvwi1u2x-kimyugyeongs-projects.vercel.app/
+https://realteeth-fe-assignments.vercel.app/
 
 ## 🖥️ 주요 화면
 

@@ -21,15 +21,17 @@ import { useActiveLocation } from "../../entities/location/model/useActiveLocati
 
 export function HomePage() {
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSearchError, setIsSearchError] = useState(false);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
   const { coords, isLoading, error } = useGeolocation();
   const { activeLocation, setFromGeo, setFromSearch } = useActiveLocation();
   const debouncedQuery = useDebouncedValue(searchKeyword, 150);
 
-  const { data } = useWeatherSummaryQuery({
-    lat: activeLocation?.lat,
-    lon: activeLocation?.lon,
-  });
+  const { data: weatherSummary, isError: isWeatherSummaryError } =
+    useWeatherSummaryQuery({
+      lat: activeLocation?.lat,
+      lon: activeLocation?.lon,
+    });
 
   const { data: adminRegion } = useQuery({
     queryKey: ["adminRegion", activeLocation?.lat, activeLocation?.lon],
@@ -75,6 +77,7 @@ export function HomePage() {
         label: suggestion.label,
       });
     } catch (err) {
+      setIsSearchError(true);
       console.error(err);
     }
   };
@@ -105,20 +108,25 @@ export function HomePage() {
               onAddressClick={handleAddressClick}
             />
           </div>
-
-          <CurrentWeatherCard
-            locationName={activeLocation?.label ?? adminRegion ?? ""}
-            temperature={data?.current.tempC ?? 0}
-            conditionLabel={data?.current.conditionText ?? null}
-            tempMax={data?.today.maxTempC ?? 0}
-            tempMin={data?.today.minTempC ?? 0}
-            humidity={data?.current.humidityPct ?? 0}
-            windSpeed={data?.current.windSpeedMs ?? 0}
-            // TODO: 즐겨찾기 기능 추가 예정
-            isFavorite
-            onFavoriteToggle={() => {}}
-          />
-          <HourlyForecast forecasts={data?.hourly3h ?? []} />
+          {isSearchError || (isWeatherSummaryError && !weatherSummary) ? (
+            <div>해당 장소의 정보가 제공되지 않습니다.</div>
+          ) : (
+            <>
+              <CurrentWeatherCard
+                locationName={activeLocation?.label ?? adminRegion ?? ""}
+                temperature={weatherSummary?.current.tempC ?? 0}
+                conditionLabel={weatherSummary?.current.conditionText ?? null}
+                tempMax={weatherSummary?.today.maxTempC ?? 0}
+                tempMin={weatherSummary?.today.minTempC ?? 0}
+                humidity={weatherSummary?.current.humidityPct ?? 0}
+                windSpeed={weatherSummary?.current.windSpeedMs ?? 0}
+                // TODO: 즐겨찾기 기능 추가 예정
+                isFavorite
+                onFavoriteToggle={() => {}}
+              />
+              <HourlyForecast forecasts={weatherSummary?.hourly3h ?? []} />
+            </>
+          )}
         </>
       )}
     </main>

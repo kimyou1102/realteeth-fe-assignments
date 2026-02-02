@@ -6,14 +6,28 @@ import { LocationPermissionDenied } from "../../shared/ui/location-permission-de
 import { useQuery } from "@tanstack/react-query";
 import { reverseGeocodeKoreanAdmin } from "../../shared/lib/kakao/reverseGeocodeKoreanAdmin";
 import { HourlyForecast } from "../../widgets/hourly-forecast/HourlyForecast";
+import { SearchInput } from "../../shared/ui/search-input/SearchInput";
+import { useMemo, useState } from "react";
+import { AddressAutoCompleteList } from "../../shared/ui/address-auto-complete-list/AddressAutocompleteList";
+import koreaDistricts from "../../shared/data/korea_districts.json";
+import { useDebouncedValue } from "../../shared/lib/addressSearch/useDebouncedValue";
+import {
+  MAX_SUGGESTIONS,
+  searchAddresses,
+  type AddressItem,
+} from "../../shared/lib/addressSearch/searchAddresses";
 
 export function HomePage() {
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
   const { coords, isLoading, error } = useGeolocation();
+  const debouncedQuery = useDebouncedValue(searchKeyword, 150);
 
   const { data } = useWeatherSummaryQuery({
     lat: coords?.lat,
     lon: coords?.lng,
   });
+
   const { data: adminRegion } = useQuery({
     queryKey: ["adminRegion", coords?.lat, coords?.lng],
     enabled: coords?.lat != undefined && coords?.lng != undefined,
@@ -25,6 +39,21 @@ export function HomePage() {
     staleTime: 1000 * 60 * 60,
   });
 
+  const handleSearchChange = (value: string) => {
+    setSearchKeyword(value);
+    setIsSuggestionOpen(true);
+  };
+
+  const handleAddressClick = (suggestion: AddressItem) => {
+    setSearchKeyword(suggestion.label);
+    setIsSuggestionOpen(false);
+  };
+
+  const suggestions = useMemo(
+    () => searchAddresses(koreaDistricts, debouncedQuery, MAX_SUGGESTIONS),
+    [debouncedQuery],
+  );
+
   if (!coords || isLoading) return <div>위치 확인 중...</div>;
 
   return (
@@ -34,6 +63,19 @@ export function HomePage() {
         <LocationPermissionDenied />
       ) : (
         <>
+          <div>
+            <SearchInput
+              placeholder="장소 검색 (시, 구, 동)"
+              value={searchKeyword}
+              onChange={handleSearchChange}
+            />
+            <AddressAutoCompleteList
+              keyword={searchKeyword}
+              address={isSuggestionOpen ? suggestions : []}
+              onAddressClick={handleAddressClick}
+            />
+          </div>
+
           <CurrentWeatherCard
             locationName={adminRegion ?? ""}
             temperature={data?.current.tempC ?? 0}

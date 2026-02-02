@@ -1,4 +1,3 @@
-import { HomeHeader } from "../../widgets";
 import { CurrentWeatherCard } from "../../widgets/current-weather-card/CurrentWeatherCard";
 import { useWeatherSummaryQuery } from "../../entities/weather/api/useWeatherSummaryQuery";
 import { useGeolocation } from "../../shared/lib/geolocation/useGeolocation";
@@ -99,7 +98,6 @@ export function HomePage() {
 
   return (
     <main>
-      <HomeHeader />
       {error && !activeLocation ? (
         <LocationPermissionDenied />
       ) : (

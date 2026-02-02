@@ -103,17 +103,19 @@ export function HomePage() {
         <LocationPermissionDenied />
       ) : (
         <HomeLayout>
-          <div>
+          <div className="relative">
             <SearchInput
               placeholder="장소 검색 (시, 구, 동)"
               value={searchKeyword}
               onChange={handleSearchChange}
             />
-            <AddressAutoCompleteList
-              keyword={searchKeyword}
-              address={isSuggestionOpen ? suggestions : []}
-              onAddressClick={handleAddressClick}
-            />
+            <div className="absolute w-full">
+              <AddressAutoCompleteList
+                keyword={searchKeyword}
+                address={isSuggestionOpen ? suggestions : []}
+                onAddressClick={handleAddressClick}
+              />
+            </div>
           </div>
           {isSearchError || (isWeatherSummaryError && !weatherSummary) ? (
             <div>해당 장소의 정보가 제공되지 않습니다.</div>

@@ -18,6 +18,7 @@ import {
 } from "../../shared/lib/addressSearch/searchAddresses";
 import { useActiveLocation } from "../../entities/location/model/useActiveLocation";
 import { useFavoriteContext } from "../../entities/favorite/model/useFavoriteContext";
+import { HomeLayout } from "./HomeLayout";
 
 export function HomePage() {
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -101,7 +102,7 @@ export function HomePage() {
       {error && !activeLocation ? (
         <LocationPermissionDenied />
       ) : (
-        <>
+        <HomeLayout>
           <div>
             <SearchInput
               placeholder="장소 검색 (시, 구, 동)"
@@ -133,7 +134,7 @@ export function HomePage() {
               <HourlyForecast forecasts={weatherSummary?.hourly3h ?? []} />
             </>
           )}
-        </>
+        </HomeLayout>
       )}
     </main>
   );

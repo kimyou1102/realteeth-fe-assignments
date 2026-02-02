@@ -24,7 +24,7 @@ type FavoriteWeatherItem = {
 };
 
 export function FavoritesPage() {
-  const { favorites } = useFavoriteContext();
+  const { favorites, remove } = useFavoriteContext();
 
   const favoriteList: FavoritePlace[] = useMemo(
     () => Object.values(favorites ?? {}),
@@ -64,6 +64,11 @@ export function FavoritesPage() {
     [queries],
   );
 
+  const handleDelete = (name: string) => {
+    if (confirm(`정말 "${name}" 즐겨찾기를 삭제하시겠습니까?`)) {
+      remove(name);
+    }
+  };
   return (
     <main>
       <h1>즐겨찾기</h1>
@@ -78,7 +83,7 @@ export function FavoritesPage() {
         <FavoriteWeatherList
           items={items}
           onChangeName={(id, nextName) => console.log(id, nextName)}
-          onDelete={(id) => console.log(id)}
+          onDelete={handleDelete}
         />
       )}
     </main>

@@ -127,7 +127,6 @@ export function HomePage() {
                 tempMin={weatherSummary?.today.minTempC ?? 0}
                 humidity={weatherSummary?.current.humidityPct ?? 0}
                 windSpeed={weatherSummary?.current.windSpeedMs ?? 0}
-                // TODO: 즐겨찾기 기능 추가 예정
                 isFavorite={isFavoriteValue}
                 onFavoriteToggle={handleFavoriteClick}
               />

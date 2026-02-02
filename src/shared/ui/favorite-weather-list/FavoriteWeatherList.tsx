@@ -2,6 +2,7 @@ import type { WeatherIconKey } from "../../../entities/weather/model/type";
 import { FavoriteWeatherItem } from "../favorite-weather-item/FavoriteWeatherItem";
 
 interface FavoriteWeatherRow {
+  id: string;
   name: string;
   current: number | null;
   min: number | null;
@@ -32,8 +33,8 @@ export function FavoriteWeatherList({
           min={item.min}
           max={item.max}
           conditionText={item.conditionText}
-          onChangeName={(next) => onChangeName(item.name, next)}
-          onDelete={() => onDelete(item.name)}
+          onChangeName={(next) => onChangeName(item.id, next)}
+          onDelete={() => onDelete(item.id)}
           editable={editable}
         />
       ))}

@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { FAVORITE_LOCATIONS_KEY } from "../../../shared/constant/localStorage";
 
 export type FavoriteLocation = {
+  id: string;
   name: string;
   lat: number;
   lon: number;
@@ -48,6 +49,7 @@ export function useFavorites() {
           delete next[id];
         } else {
           next[id] = {
+            id,
             name: location.label ?? adminRegion ?? "",
             lat: location.lat,
             lon: location.lon,
@@ -61,14 +63,14 @@ export function useFavorites() {
     [],
   );
 
-  const remove = useCallback((name: string) => {
-    if (!name) return;
+  const remove = useCallback((id: string) => {
+    if (!id) return;
 
     setFavorites((prev) => {
-      if (!prev[name]) return prev;
+      if (!prev[id]) return prev;
 
       const next = { ...prev };
-      delete next[name];
+      delete next[id];
 
       saveFavorites(next);
       return next;
@@ -78,7 +80,7 @@ export function useFavorites() {
   const reName = useCallback((id: string, nextName: string) => {
     const trimmed = nextName.trim();
     if (!id) return;
-    if (!trimmed) return; // 빈 이름 허용하고 싶으면 이 줄 제거
+    if (!trimmed) return;
 
     setFavorites((prev) => {
       const target = prev[id];

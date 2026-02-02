@@ -13,9 +13,10 @@ import {
   getCondition,
 } from "../../entities/weather/model/condition";
 
-type FavoritePlace = { name: string; lat: number; lon: number };
+type FavoritePlace = { name: string; lat: number; lon: number; id: string };
 
 type FavoriteWeatherItem = {
+  id: string;
   name: string;
   current: number | null;
   min: number | null;
@@ -45,6 +46,7 @@ export function FavoritesPage() {
         });
 
         return {
+          id: fav.id,
           name: fav.name,
           current: data.current.tempC ?? null,
           min: data.today.minTempC ?? null,
@@ -69,7 +71,6 @@ export function FavoritesPage() {
       remove(name);
     }
   };
-
   const handleChangeName = (id: string, nextName: string) => {
     reName(id, nextName);
   };

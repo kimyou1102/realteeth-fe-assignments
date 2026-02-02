@@ -34,6 +34,36 @@ function safeNum(v: string | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+function toKstKey(d: Date) {
+  const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  const y = kst.getUTCFullYear();
+  const m = String(kst.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(kst.getUTCDate()).padStart(2, "0");
+  const hh = String(kst.getUTCHours()).padStart(2, "0");
+  const mm = String(kst.getUTCMinutes()).padStart(2, "0");
+  return `${y}${m}${day}${hh}${mm}`; // YYYYMMDDHHmm
+}
+
+function ceilToNext3h(now: Date) {
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const y = kst.getUTCFullYear();
+  const m = kst.getUTCMonth();
+  const d = kst.getUTCDate();
+  const h = kst.getUTCHours();
+
+  const nextH = Math.ceil((h + 1e-9) / 3) * 3; // 현재 시각이면 다음 슬롯
+  const aligned = new Date(Date.UTC(y, m, d, nextH % 24, 0, 0));
+
+  // nextH가 24면 다음날 00시로 넘겨야 함
+  if (nextH >= 24) {
+    aligned.setUTCDate(aligned.getUTCDate() + 1);
+    aligned.setUTCHours(0);
+  }
+
+  // aligned는 KST기준 UTC로 만들어졌으니, 다시 "원래 Date(UTC)"로 되돌리려면 -9h
+  return new Date(aligned.getTime() - 9 * 60 * 60 * 1000);
+}
+
 function ymdToDashed(ymd: string) {
   return `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}`;
 }
@@ -96,6 +126,7 @@ export function mapToWeatherSummary(args: {
   for (const key of keys) {
     const fcstDate = key.slice(0, 8);
     if (fcstDate !== args.todayYmd) continue;
+
     const cat = fcstMap.get(key)!;
 
     if (minTempC == null && cat["TMN"] != null) minTempC = safeNum(cat["TMN"]);
@@ -103,14 +134,37 @@ export function mapToWeatherSummary(args: {
     if (minTempC != null && maxTempC != null) break;
   }
 
+  if (minTempC == null || maxTempC == null) {
+    const temps: number[] = [];
+    for (const key of keys) {
+      const fcstDate = key.slice(0, 8);
+      if (fcstDate !== args.todayYmd) continue;
+      const cat = fcstMap.get(key)!;
+      const t = safeNum(cat["TMP"]);
+      if (t != null) temps.push(t);
+    }
+    if (temps.length > 0) {
+      if (minTempC == null) minTempC = Math.min(...temps);
+      if (maxTempC == null) maxTempC = Math.max(...temps);
+    }
+  }
+
+  const start = ceilToNext3h(args.now);
+  const startKey = toKstKey(start);
+  const endKey = toKstKey(new Date(start.getTime() + 24 * 60 * 60 * 1000));
+
   const hourly3h: WeatherSummary["hourly3h"] = [];
+
   for (const key of keys) {
-    const fcstDate = key.slice(0, 8);
+    // key: YYYYMMDDHHmm
+    if (key < startKey) continue;
+    if (key >= endKey) break; // keys가 sort 되어 있으니 break 가능
+
     const fcstTime = key.slice(8, 12);
-    if (fcstDate !== args.todayYmd) continue;
     if (!is3hSlot(fcstTime)) continue;
 
     const cat = fcstMap.get(key)!;
+    const fcstDate = key.slice(0, 8);
 
     hourly3h.push({
       date: ymdToDashed(fcstDate),

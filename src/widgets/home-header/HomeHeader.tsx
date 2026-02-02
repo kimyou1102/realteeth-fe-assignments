@@ -1,11 +1,17 @@
 import { Star } from "lucide-react";
-import { cn } from "../../shared/lib/cn";
-import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export function HomeHeader() {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const handleFavoriteClick = () => {
-    setIsFavorite((prev) => !prev);
+    const nextPath = location.pathname === "/favorites" ? "/" : "/favorites";
+    navigate(nextPath);
+  };
+
+  const handleLogoClick = () => {
+    navigate("/");
   };
 
   return (
@@ -14,7 +20,12 @@ export function HomeHeader() {
         "flex items-center justify-between px-4 h-14 border-b bg-white border-[#e2e2e2]"
       }
     >
-      <h1 className="text-lg font-semibold">날씨</h1>
+      <h1
+        className="text-lg font-semibold cursor-pointer"
+        onClick={handleLogoClick}
+      >
+        날씨
+      </h1>
 
       <button
         type="button"
@@ -22,12 +33,7 @@ export function HomeHeader() {
         aria-label="즐겨찾기"
         className="flex items-center justify-center rounded-md p-2 hover:bg-gray-100"
       >
-        <Star
-          className={cn(
-            "h-5 w-5",
-            isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-500",
-          )}
-        />
+        <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
       </button>
     </header>
   );
